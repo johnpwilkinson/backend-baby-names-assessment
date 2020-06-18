@@ -44,8 +44,29 @@ def extract_names(filename):
     ['2006', 'Aaliyah 91', 'Aaron 57', 'Abagail 895', ...]
     """
     names = []
-    # +++your code here+++
+    result_dict = {}
+    with open(filename, 'r') as f:
+        f_contents = f.read()
+        # finditer returns an iterator of match objects for the PATTERN in the STRING
+        for match in re.finditer(r'in \d{4}',f_contents ):
+            # match.span returns a 2-tuple of the index of the match in the file
+            year = match.span()
+            # makes a slice from f_contents based on the index tuple to capture the year
+            # and adds it to the names list 
+            names.append(f_contents[year[1]-4:year[1]])
+    # find all names on the page
+        name_and_ranking=re.findall(r'"right"><td>(.*?)</td><td>(.*?)</td><td>(.*?)</td>', f_contents)
+        for name in name_and_ranking:
+            # if the names are not in the dict, then add them and set their rankings as their values
+            if not name[1] in result_dict:
+                result_dict[name[1]]=name[0]
+            if not name[2] in result_dict:
+                result_dict[name[2]]=name[0]
+            # sort the keys alphabetically and unpack them and their values... add them to names list
+        for key, value in sorted(result_dict.items()):
+            names.append(key + ' ' + value)
     return names
+
 
 
 def create_parser():
@@ -83,7 +104,15 @@ def main(args):
     # or to write the list to a summary file (e.g. `baby1990.html.summary`).
 
     # +++your code here+++
-
+    for file in file_list:
+        _file = extract_names(file)
+        if not create_summary:
+            print(*_file, sep='\n')
+        else:
+            summary_file = file + '.summary'
+            with open(summary_file, 'w') as j:
+                for data in _file:
+                    j.write(data + '\n')
 
 if __name__ == '__main__':
     main(sys.argv[1:])
